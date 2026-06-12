@@ -1,0 +1,32 @@
+schema_version: "1.0"
+
+extension:
+  id: "lens-compress"
+  name: "Lens Compress"
+  version: "0.1.0"
+  description: "Applies semantic compression to speckit artifacts (spec.md, plan.md, tasks.md) before implement runs to reduce token consumption."
+  author: "josechudev"
+  repository: "https://github.com/josechudev/speckit-lens"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.9.1"
+
+provides:
+  commands:
+    - name: "speckit.lens.compress"
+      file: "commands/compress.md"
+      description: "Compress speckit artifacts in-place, preserving semantic content and backing up originals."
+
+hooks:
+  before_implement:
+    command: "speckit.lens.compress"
+    optional: true
+    prompt: "Run lens-compress to reduce artifact token consumption before implement?"
+    description: "Compresses spec.md, plan.md, and tasks.md before the implement loop begins."
+
+tags:
+  - "compression"
+  - "tokens"
+  - "artifacts"
+  - "implement"

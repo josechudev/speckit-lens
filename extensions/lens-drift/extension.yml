@@ -1,0 +1,32 @@
+schema_version: "1.0"
+
+extension:
+  id: "lens-drift"
+  name: "Lens Drift"
+  version: "0.1.0"
+  description: "Per-task spec adherence guard: diffs generated code against its spec section after each implement task and flags violations."
+  author: "josechudev"
+  repository: "https://github.com/josechudev/speckit-lens"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.9.1"
+
+provides:
+  commands:
+    - name: "speckit.lens.drift"
+      file: "commands/drift.md"
+      description: "Score spec adherence for the just-completed task and optionally inject a correction prompt before the next task."
+
+hooks:
+  after_task:
+    command: "speckit.lens.drift"
+    optional: true
+    prompt: "Run lens-drift to check spec adherence for this task?"
+    description: "Diffs generated code against the spec section mapped to the completed task."
+
+tags:
+  - "spec-adherence"
+  - "drift"
+  - "implement"
+  - "validation"

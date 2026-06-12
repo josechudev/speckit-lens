@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "lens-trace": {
+      "name": "Lens Trace",
+      "id": "lens-trace",
+      "version": "0.1.0",
+      "description": "Real-time task execution visibility during speckit implement runs: current task, intended files, and change summary.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["visibility", "tracing", "implement"]
+    },
+    "lens-drift": {
+      "name": "Lens Drift",
+      "id": "lens-drift",
+      "version": "0.1.0",
+      "description": "Per-task spec adherence guard: diffs generated code against its spec section after each implement task and flags violations.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["spec-adherence", "drift", "implement", "validation"]
+    },
+    "lens-humanize": {
+      "name": "Lens Humanize",
+      "id": "lens-humanize",
+      "version": "0.1.0",
+      "description": "Translates the agent-oriented plan.md into PR-sized chunks with ownership signals, visible dependencies, and entry/exit criteria.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["plan", "readability", "human-review", "pr"]
+    },
+    "lens-compress": {
+      "name": "Lens Compress",
+      "id": "lens-compress",
+      "version": "0.1.0",
+      "description": "Applies semantic compression to speckit artifacts (spec.md, plan.md, tasks.md) before implement runs to reduce token consumption.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["compression", "tokens", "artifacts", "implement"]
+    },
+    "lens-contract": {
+      "name": "Lens Contract",
+      "id": "lens-contract",
+      "version": "0.1.0",
+      "description": "Conversational contract generation from OpenAPI specs or JSON schemas. Asks targeted questions and writes .specify/contracts/ files.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["contracts", "validation", "openapi", "schema"]
+    },
+    "lens-probe": {
+      "name": "Lens Probe",
+      "id": "lens-probe",
+      "version": "0.1.0",
+      "description": "Validates ADK response stream JSON against a contract in .specify/contracts/. Reports violations with event index and rule reference.",
+      "author": "josechudev",
+      "repository": "https://github.com/josechudev/speckit-lens",
+      "tags": ["validation", "contracts", "runtime", "adk"]
+    }
+  }
+}

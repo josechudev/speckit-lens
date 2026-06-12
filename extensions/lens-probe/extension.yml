@@ -1,0 +1,25 @@
+schema_version: "1.0"
+
+extension:
+  id: "lens-probe"
+  name: "Lens Probe"
+  version: "0.1.0"
+  description: "Validates ADK response stream JSON against a contract in .specify/contracts/. Reports violations with event index and rule reference."
+  author: "josechudev"
+  repository: "https://github.com/josechudev/speckit-lens"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.9.1"
+
+provides:
+  commands:
+    - name: "speckit.lens.probe"
+      file: "commands/probe.md"
+      description: "Validate a runtime ADK response stream against a contract and report violations."
+
+tags:
+  - "validation"
+  - "contracts"
+  - "runtime"
+  - "adk"

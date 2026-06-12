@@ -1,0 +1,32 @@
+schema_version: "1.0"
+
+extension:
+  id: "lens-contract"
+  name: "Lens Contract"
+  version: "0.1.0"
+  description: "Conversational contract generation from OpenAPI specs or JSON schemas. Asks targeted questions and writes .specify/contracts/ files."
+  author: "josechudev"
+  repository: "https://github.com/josechudev/speckit-lens"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.9.1"
+
+provides:
+  commands:
+    - name: "speckit.lens.contract"
+      file: "commands/contract.md"
+      description: "Generate a structured contract file from an OpenAPI spec or JSON schema via targeted Q&A."
+
+hooks:
+  before_implement:
+    command: "speckit.lens.contract"
+    optional: true
+    prompt: "Run lens-contract to generate contracts before implement?"
+    description: "Ensures contracts exist in .specify/contracts/ before code is written."
+
+tags:
+  - "contracts"
+  - "validation"
+  - "openapi"
+  - "schema"

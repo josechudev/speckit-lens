@@ -1,0 +1,31 @@
+schema_version: "1.0"
+
+extension:
+  id: "lens-trace"
+  name: "Lens Trace"
+  version: "0.1.0"
+  description: "Real-time task execution visibility during speckit implement runs: current task, intended files, and change summary."
+  author: "josechudev"
+  repository: "https://github.com/josechudev/speckit-lens"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=0.9.1"
+
+provides:
+  commands:
+    - name: "speckit.lens.trace"
+      file: "commands/trace.md"
+      description: "Surface which task is running, what files it intends to modify, and what changed after it completes."
+
+hooks:
+  after_task:
+    command: "speckit.lens.trace"
+    optional: true
+    prompt: "Run lens-trace to surface task execution summary?"
+    description: "Emits a trace header before each implement task and a change summary after it completes."
+
+tags:
+  - "visibility"
+  - "tracing"
+  - "implement"
