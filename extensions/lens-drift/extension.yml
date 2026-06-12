@@ -20,10 +20,10 @@ provides:
 
 hooks:
   after_task:
-    command: "speckit.lens.drift"
-    optional: true
-    prompt: "Run lens-drift to check spec adherence for this task?"
-    description: "Diffs generated code against the spec section mapped to the completed task."
+    - command: "speckit.lens.drift"
+      priority: 20
+      optional: true
+      prompt: "Run lens-drift to check spec adherence for this task?"
 
 tags:
   - "spec-adherence"

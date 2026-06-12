@@ -6,6 +6,19 @@ speckit-lens is a suite of six extensions that address the parts of spec-driven 
 
 ---
 
+## Status
+
+| Extension | Status | Notes |
+|-----------|--------|-------|
+| `lens-trace` | ⚠️ Implemented — needs verification | Includes static HTML dashboard (`/speckit.lens.dashboard`) |
+| `lens-drift` | ⚠️ Implemented — needs verification | EARS-aware scoring, drift.log output |
+| `lens-humanize` | ⚠️ Implemented — needs verification | Writes `.specify/plan-human.md` |
+| `lens-contract` | ⚠️ Implemented — needs verification | OpenAPI + JSON Schema, interactive Q&A |
+| `lens-compress` | 🔲 Not started | |
+| `lens-probe` | 🔲 Not started | |
+
+---
+
 ## The Problem
 
 speckit is powerful but optimized for agent consumption, not human oversight. During a typical `implement` run:
@@ -25,10 +38,11 @@ speckit-lens closes each of these gaps.
 
 ### `lens-trace` — Task Execution Visibility
 
-Surfaces what speckit is doing inside `implement` in real time: which task is running, what files it intends to modify, and a summary of what changed before the next task begins.
+Surfaces what speckit is doing inside `implement` in real time: which task is running, what files it intends to modify, and a summary of what changed. Appends a structured log to `.specify/trace.log`. Generates a static HTML dashboard on demand.
 
 ```
 /speckit.lens.trace
+/speckit.lens.dashboard
 ```
 
 **Solves:** Black-box `implement` runs where the only feedback is file changes after the fact.
@@ -37,7 +51,7 @@ Surfaces what speckit is doing inside `implement` in real time: which task is ru
 
 ### `lens-drift` — Per-Task Spec Adherence Guard
 
-After each task in the `implement` loop, diffs the generated code against the spec section mapped to that task. Scores adherence, flags violations with contract line references, and optionally injects a correction prompt before the next task runs.
+After each task in the `implement` loop, diffs the generated code against the spec section mapped to that task. Scores adherence using EARS-pattern detection, flags violations with spec line references, optionally injects a correction prompt before the next task, and appends scores to `.specify/drift.log`.
 
 ```
 /speckit.lens.drift
@@ -61,7 +75,7 @@ Translates the agent-oriented `plan.md` into PR-sized chunks with clear ownershi
 
 ### `lens-compress` — Speckit Artifact Compression
 
-Applies caveman-style semantic compression to speckit artifacts (`spec.md`, `plan.md`, `tasks.md`) before `implement` runs, reducing context token consumption without losing semantic content. Originals are backed up before compression.
+Applies semantic compression to speckit artifacts (`spec.md`, `plan.md`, `tasks.md`) before `implement` runs, reducing context token consumption without losing semantic content. Originals are backed up before compression.
 
 ```
 /speckit.lens.compress
@@ -73,7 +87,7 @@ Applies caveman-style semantic compression to speckit artifacts (`spec.md`, `pla
 
 ### `lens-contract` — Conversational Contract Generation
 
-Accepts an OpenAPI spec or base JSON schema as input, asks targeted questions about expected runtime behavior (cardinality, required fields, attachment rules, event ordering), and generates a structured contract file in `.specify/contracts/`. Runs as a `before_implement` hook so contracts exist before code is written.
+Accepts an OpenAPI spec or base JSON schema as input, asks targeted questions about expected runtime behavior (cardinality, required fields, invariants, event ordering), and generates a structured contract file in `.specify/contracts/`. Runs as a `before_implement` hook so contracts exist before code is written.
 
 ```
 /speckit.lens.contract --from openapi.yaml
@@ -85,40 +99,100 @@ Accepts an OpenAPI spec or base JSON schema as input, asks targeted questions ab
 
 ### `lens-probe` — Runtime Output Validation
 
-Accepts raw ADK response stream JSON and validates it against a contract in `.specify/contracts/`. Reports violations with event index, rule reference, and what was found versus what the contract expects.
+Accepts raw ADK response stream JSON and validates it against a contract in `.specify/contracts/`. Reports violations with event index, rule reference, and what was found versus what the contract expects. Suitable as a CI gate (exit code `1` on violations).
 
 ```
 /speckit.lens.probe --input stream.json --contract contracts/api.md
 ```
 
-**Solves:** No path to bring Postman/runtime output evidence back into speckit for contract validation. Drift that is only visible when you're manually reading a response log.
+**Solves:** No path to bring Postman/runtime output evidence back into speckit for contract validation.
 
 ---
 
 ## Extension Pairs
 
-`lens-contract` and `lens-probe` are designed as a pair: one generates the contract from your schema, the other validates runtime output against it. `lens-drift` and `lens-trace` are designed to run together during `implement`: trace surfaces what's happening, drift validates that what happened matches the spec.
+`lens-contract` + `lens-probe` — one generates the contract from your schema, the other validates runtime output against it.
+
+`lens-trace` + `lens-drift` — designed to run together during `implement`: trace surfaces what's happening, drift validates that what happened matches the spec. Both feed the dashboard.
 
 ---
 
-## Installation
+## Adding extensions to a speckit project
 
-Each extension is installable independently via the speckit extensions catalog or directly from this repo:
+### Prerequisites
+
+- speckit `>=0.9.1` (hooks stable from this version)
+- `uv` installed (required for `lens-trace` dashboard script only)
+
+### From this repo (local dev)
+
+Install each extension directly from its directory:
 
 ```bash
-# Install the full suite
-speckit extensions install https://github.com/<your-handle>/speckit-lens/archive/refs/tags/v0.1.0.zip
+cd /your/speckit/project
 
-# Or install individually (once per-extension zip releases are available)
-speckit extensions install lens-trace
-speckit extensions install lens-drift
-speckit extensions install lens-humanize
-speckit extensions install lens-compress
-speckit extensions install lens-contract
-speckit extensions install lens-probe
+specify extension add lens-trace    --from /path/to/speckit-lens/extensions/lens-trace
+specify extension add lens-drift    --from /path/to/speckit-lens/extensions/lens-drift
+specify extension add lens-humanize --from /path/to/speckit-lens/extensions/lens-humanize
+specify extension add lens-compress --from /path/to/speckit-lens/extensions/lens-compress
+specify extension add lens-contract --from /path/to/speckit-lens/extensions/lens-contract
+specify extension add lens-probe    --from /path/to/speckit-lens/extensions/lens-probe
 ```
 
-Requires speckit `>=0.9.1` (hooks stable from this version).
+Or via zip:
+
+```bash
+zip -r lens-trace.zip /path/to/speckit-lens/extensions/lens-trace
+specify extension add lens-trace --from ./lens-trace.zip
+```
+
+### From a release (once published)
+
+```bash
+specify extension add lens-trace    --from https://github.com/josechudev/speckit-lens/archive/refs/tags/v0.1.0.zip
+```
+
+### Verify installation
+
+```bash
+specify extension list
+# lens-trace    0.1.0   ✓
+# lens-drift    0.1.0   ✓
+# ...
+```
+
+### Recommended install order
+
+Install all at once — extensions are independent. If installing selectively, respect these dependencies:
+
+1. Install `lens-contract` before `lens-probe` (probe reads contracts that contract writes)
+2. Install `lens-trace` before `lens-drift` (drift.log feeds the trace dashboard)
+3. `lens-compress` and `lens-humanize` have no dependencies on other lens extensions
+
+### Recommended workflow
+
+```
+/speckit.specify          # define what to build
+/speckit.lens.contract    # generate contracts before any code is written
+/speckit.plan             # agent builds plan.md
+/speckit.lens.humanize    # translate plan for human review → .specify/plan-human.md
+/speckit.lens.compress    # compress artifacts to reduce token load
+/speckit.tasks            # agent breaks plan into tasks
+/speckit.implement        # implement loop — lens-trace + lens-drift fire after each task
+/speckit.lens.dashboard   # post-run: generate HTML report from trace.log + drift.log
+/speckit.lens.probe       # validate runtime output against contracts
+```
+
+### Hook execution order during `implement`
+
+Both `lens-trace` and `lens-drift` run as `after_task` hooks. Priority is fixed:
+
+| Priority | Extension | Hook |
+|----------|-----------|------|
+| 10 | lens-trace | after_task |
+| 20 | lens-drift | after_task |
+
+Lower number runs first. lens-trace always runs before lens-drift.
 
 ---
 
@@ -129,28 +203,38 @@ speckit-lens/
   extensions/
     lens-trace/
       extension.yml
+      spec.md
       commands/
         trace.md
+        dashboard.md
+      scripts/
+        dashboard.py      # uv inline — stdlib only
     lens-drift/
       extension.yml
+      spec.md
       commands/
         drift.md
     lens-humanize/
       extension.yml
+      spec.md
       commands/
         humanize.md
     lens-compress/
       extension.yml
+      spec.md
       commands/
         compress.md
     lens-contract/
       extension.yml
+      spec.md
       commands/
         contract.md
     lens-probe/
       extension.yml
+      spec.md
       commands/
         probe.md
+  catalog.community.json
   README.md
   CONTRIBUTING.md
   LICENSE
@@ -160,12 +244,13 @@ speckit-lens/
 
 ## Roadmap
 
-- [ ] `lens-trace` v0.1 — task execution visibility
-- [ ] `lens-drift` v0.1 — per-task spec adherence guard
-- [ ] `lens-humanize` v0.1 — human-readable plan translation
+- [x] `lens-trace` v0.1 — task execution visibility + HTML dashboard
+- [x] `lens-drift` v0.1 — per-task spec adherence guard (EARS-aware)
+- [x] `lens-humanize` v0.1 — human-readable plan translation
 - [ ] `lens-compress` v0.1 — artifact compression
-- [ ] `lens-contract` v0.1 — conversational contract generation
+- [x] `lens-contract` v0.1 — conversational contract generation
 - [ ] `lens-probe` v0.1 — ADK runtime output validation
+- [ ] Acceptance verification pass (trace, drift, humanize, contract)
 - [ ] Community catalog submission (spec-kit/extensions/catalog.community.json)
 
 ---

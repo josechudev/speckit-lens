@@ -17,6 +17,9 @@ provides:
     - name: "speckit.lens.trace"
       file: "commands/trace.md"
       description: "Surface which task is running, what files it intends to modify, and what changed after it completes."
+    - name: "speckit.lens.dashboard"
+      file: "commands/dashboard.md"
+      description: "Generate a static HTML dashboard from trace.log and drift.log for post-run review."
 
 hooks:
   after_task:
